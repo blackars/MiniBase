@@ -171,6 +171,6 @@ Pillow
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
   ## Contact
 
-  Brayan Andres Castillo Mesa @blackars - [@_arsblack_](https://twitter.com/arsblack) - 
+  Brayan Andres Castillo Mesa @blackars - [@_arsblack_](https://twitter.com/_arsblack) - 
 
   Project Link: [https://github.com/blackars/MiniBase](https://github.com/blackars/MiniBase) 
