@@ -1,8 +1,9 @@
 # MiniBase
 
-![Screenshot of the application](\MiniBase\screenshots\home_screen.png)
+![Screenshot of the application](screenshots\home_screen.png)
 
-## MiniBase v1.0.0: Dynamic Miniature Management with Potential for AI and RPG
+## MiniBase v1.0.0: 
+## Dynamic Collectible Tiny Character Management with Potential for AI and RPG
 
 ### What is MiniBase?
 
