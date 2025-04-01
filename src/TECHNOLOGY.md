@@ -166,12 +166,11 @@ Pillow
   5. Open a Pull Request and briefly describe the changes made to facilitate review.
 
 
-  ## Licencia
+  ## License
 
-  Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-  ## Contacto
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+  ## Contact
 
   Brayan Andres Castillo Mesa @blackars - [@_arsblack_](https://twitter.com/arsblack) - 
 
-  Link del Proyecto: [https://github.com/blackars/MiniBase](https://github.com/blackars/MiniBase) 
+  Project Link: [https://github.com/blackars/MiniBase](https://github.com/blackars/MiniBase) 
