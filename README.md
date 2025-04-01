@@ -20,4 +20,4 @@ Its **modular and extensible** design paves the way for future **AI integrations
 ✔️ **Intuitive and attractive visualization**  
 ✔️ **User-friendly interface** for collectors and creators  
 
-[📜 More technical details »](./TECNOLOGIA.md)
+[📜 More technical details »](src/TECNOLOGIA.md)
