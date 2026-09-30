@@ -51,7 +51,7 @@ export default function Inbox() {
 
   if (!token) return (<main className="p-6"><p className="text-zinc-500 text-sm">Verificando acceso…</p></main>);
 
-  return (<main className="p-6 max-w-4xl mx-auto">
+  return (<main className="p-6 max-w-4xl mx-auto mb-sharp">
     <a href="/" className="text-zinc-400 text-sm">← Volver</a>
     <h1 className="text-2xl font-bold mt-2">Completar poco a poco</h1>
     <p className="text-xs text-zinc-500 mt-1">{total} campos vacíos en tu colección. Cada respuesta actualiza la mini y su completitud.</p>

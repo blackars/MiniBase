@@ -101,7 +101,7 @@ export default function Imports() {
   const canonOpts = ["", ...(preview ? Object.values(preview.canon_groups).flat() as string[] : [])];
   const unmapped = Object.entries(mapping).filter(([, v]) => !v);
 
-  return (<main className="p-6 max-w-6xl mx-auto">
+  return (<main className="p-6 max-w-6xl mx-auto mb-sharp">
     <a href="/" className="text-zinc-400 text-sm">← Volver</a>
     <h1 className="text-2xl font-bold mt-2">Importar Excel por lotes</h1>
     <p className="text-xs text-zinc-500 mt-1">Tu formato se mapea solo (ES/EN, tildes, comas decimales). Lo vacío no borra nada.</p>

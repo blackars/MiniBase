@@ -73,8 +73,17 @@ const PHOTO_VIEWS = ["frontal", "black_background", "white_background", "lateral
   "back_view", "top_view", "bottom_view", "close_up", "isometric", "other"];
 const REF_VIEWS = ["render_3d", "concept_art", "paint_reference"];
 
-function Gallery({ mini, token, api }: { mini: any; token: string; api: string }) {
-  const [gal, setGal] = useState<any>(null);
+// Logo MiniBase: liminal B/N, geometría puntiaguda (también en app/icon.svg = favicon).
+function Logo() {
+  return (<svg width="34" height="34" viewBox="0 0 64 64" aria-label="MiniBase" role="img">
+    <rect width="64" height="64" fill="#09090b" />
+    <rect x="6" y="6" width="52" height="52" fill="none" stroke="#fafafa" strokeWidth="4" />
+    <path d="M20 44V20l12 14 12-14v24" fill="none" stroke="#fafafa" strokeWidth="5" strokeLinecap="square" />
+    <rect x="44" y="44" width="8" height="8" fill="#fafafa" />
+  </svg>);
+}
+
+function Gallery({ mini, token, api }: { mini: any; token: string; api: string }) {  const [gal, setGal] = useState<any>(null);
   const [view, setView] = useState("frontal");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
@@ -339,18 +348,18 @@ export default function Dashboard() {
     if (!confirm(`¿Borrar ${m.name}?`)) return;
     const r = await fetch(`${API}/api/minis/${m.id}`, { method: "DELETE", headers: authHeaders() });
     if (!r.ok) { const j = await r.json().catch(() => ({})); return alert("Error al borrar: " + (j.detail || r.status)); }
-    setDetail(null); reload(q, token, page); loadFacets(token); loadFieldFacets(token);
+    setDetail(null); setShowForm(false); reload(q, token, page); loadFacets(token); loadFieldFacets(token);
   }
   const set = (k: string) => (e: any) => setForm({ ...form, [k]: e.target.value });
   const inp = "bg-zinc-900 border border-zinc-800 rounded px-3 py-2 outline-none w-full text-sm";
   const lbl = "text-xs text-zinc-400 mb-1 block";
 
-  if (checking) return (<main className="min-h-screen flex items-center justify-center">
+  if (checking) return (<main className="min-h-screen flex items-center justify-center mb-sharp">
     <p className="text-zinc-500 text-sm">Verificando sesión…</p>
   </main>);
 
   // PUERTA TOTAL: sin sesión no se renderiza nada de la app (ni buscador ni minis).
-  if (!user) return (<main className="min-h-screen flex items-center justify-center p-6">
+  if (!user) return (<main className="min-h-screen flex items-center justify-center p-6 mb-sharp">
     <div className="bg-zinc-900 border border-zinc-800 rounded p-6 w-full max-w-sm">
       <h1 className="text-2xl font-bold">MiniBase Web</h1>
       <p className="text-xs text-zinc-500 mt-1">Acceso privado — {apiOk}</p>
@@ -365,11 +374,15 @@ export default function Dashboard() {
     </div>
   </main>);
 
-  return (<main className="p-6 max-w-6xl mx-auto">
-    <h1 className="text-3xl font-bold">MiniBase Web <span className="text-zinc-500 text-lg">oscuro · agent-ready</span></h1>
-    <p className="text-xs text-zinc-500 mt-1">API: {apiOk} · {total} minis · Supabase nube · <a className="underline" href={`${API}/docs`} target="_blank">Swagger</a></p>
-    <div className="mt-2 text-xs text-zinc-400">Conectado: <span className="text-emerald-400">{user.email}</span>
-      <button onClick={doLogout} className="underline ml-3">Salir</button>
+  return (<main className="p-6 max-w-6xl mx-auto mb-sharp">
+    <div className="flex items-start justify-between gap-4 flex-wrap">
+      <h1 className="text-3xl font-bold flex items-center gap-3"><Logo />MiniBase Web</h1>
+      <div className="bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs text-zinc-400 text-right">
+        <p className="text-zinc-500">API: {apiOk} · {total} minis · Supabase nube · <a className="underline" href={`${API}/docs`} target="_blank">Swagger</a></p>
+        <p className="mt-1">Conectado: <span className="text-emerald-400">{user.email}</span>
+          <button onClick={doLogout} className="underline ml-3">Salir</button>
+        </p>
+      </div>
     </div>
     <div className="flex gap-2 mt-4 flex-wrap">
       <div className="relative flex-1 min-w-[200px]">
@@ -383,10 +396,6 @@ export default function Dashboard() {
         <option value="">todo tipo</option>
         {["mini", "scenery", "token", "tile", "prop"].map(t => <option key={t} value={t}>{t}</option>)}
       </select>
-      <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); reload(q, token, 1, selTags, ftype, Number(e.target.value)); }}
-        className="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm">
-        {[24, 50, 100].map(n => <option key={n} value={n}>{n}/pág</option>)}
-      </select>
       <button onClick={openCreate} className="bg-white text-black rounded px-4 py-2 font-semibold">+ Nueva mini</button>
       <a href="/imports" className="bg-zinc-800 border border-zinc-700 rounded px-4 py-2">⭳ Importar Excel</a>
       <a href="/inbox" className="bg-zinc-800 border border-zinc-700 rounded px-4 py-2">✓ Completar</a>
@@ -399,7 +408,7 @@ export default function Dashboard() {
             const next = selTags.includes(t.name) ? selTags.filter(x => x !== t.name) : [...selTags, t.name];
             setSelTags(next); setPage(1); reload(q, token, 1, next, ftype);
           }}
-            className={`text-xs rounded-full px-2 py-1 border ${selTags.includes(t.name) ? "bg-white text-black" : "bg-zinc-900 border-zinc-700"}`}>
+            className={`tag-pill text-xs rounded-full px-2 py-1 border ${selTags.includes(t.name) ? "bg-white text-black" : "bg-zinc-900 border-zinc-700"}`}>
             {t.name} ({t.count})</button>))}
       </div>)}
     {loading && <p className="text-xs text-zinc-500 mt-2">Buscando…</p>}
@@ -430,19 +439,24 @@ export default function Dashboard() {
           <div className="text-xs text-zinc-400">{m.type} · x{m.quantity ?? 1} · {m.completeness_score ?? 0}%</div>
           <div className="h-1 bg-zinc-800 rounded mt-2"><div className="h-1 bg-emerald-400 rounded" style={{ width: `${m.completeness_score ?? 0}%` }} /></div>
           <div className="flex gap-2 mt-2">
-            <button onClick={(e) => { e.stopPropagation(); openEdit(m); }} className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1">Editar</button>
-            <button onClick={(e) => { e.stopPropagation(); remove(m); }} className="text-xs bg-red-950 border border-red-900 rounded px-2 py-1">Borrar</button>
+            <button onClick={(e) => { e.stopPropagation(); openEdit(m); }} className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 w-full">Editar</button>
           </div>
         </div>))}
     </div>
     {minis.length === 0 && !loading && <p className="text-zinc-500 mt-6">Sin resultados. Ajusta búsqueda o filtros.</p>}
     {total > pageSize && (
-      <div className="flex gap-2 mt-4 items-center text-sm">
-        <button disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); reload(q, token, p); }}
-          className="bg-zinc-800 rounded px-3 py-1 disabled:opacity-40">←</button>
-        <span className="text-xs text-zinc-400">pág {page} de {Math.ceil(total / pageSize)} · {total} minis</span>
-        <button disabled={page * pageSize >= total} onClick={() => { const p = page + 1; setPage(p); reload(q, token, p); }}
-          className="bg-zinc-800 rounded px-3 py-1 disabled:opacity-40">→</button>
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <div className="flex gap-2 items-center text-sm">
+          <button disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); reload(q, token, p); }}
+            className="bg-zinc-800 rounded px-3 py-1 disabled:opacity-40">←</button>
+          <span className="text-xs text-zinc-400">pág {page} de {Math.ceil(total / pageSize)} · {total} minis</span>
+          <button disabled={page * pageSize >= total} onClick={() => { const p = page + 1; setPage(p); reload(q, token, p); }}
+            className="bg-zinc-800 rounded px-3 py-1 disabled:opacity-40">→</button>
+        </div>
+        <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); reload(q, token, 1, selTags, ftype, Number(e.target.value)); }}
+          className="bg-zinc-900 border border-zinc-800 rounded px-3 py-1 text-xs text-zinc-400">
+          {[24, 50, 100].map(n => <option key={n} value={n}>{n}/pág</option>)}
+        </select>
       </div>)}
 
     {detail && (
@@ -501,6 +515,8 @@ export default function Dashboard() {
           <div className="flex gap-2 mt-4">
             <button type="submit" className="bg-white text-black rounded px-4 py-2 font-semibold">Guardar</button>
             <button type="button" onClick={() => setShowForm(false)} className="bg-zinc-800 rounded px-4 py-2">Cancelar</button>
+            {editing && (<button type="button" onClick={() => remove(editing)}
+              className="bg-red-950 border border-red-900 rounded px-4 py-2 ml-auto">Borrar</button>)}
           </div>
         </form>
       </div>)}

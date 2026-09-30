@@ -1,6 +1,6 @@
 "use client";
 export default function MiniDetail({ params }: { params: { id: string } }) {
-  return (<main className="p-6 max-w-4xl mx-auto">
+  return (<main className="p-6 max-w-4xl mx-auto mb-sharp">
     <a href="/" className="text-zinc-400 text-sm">← Volver</a>
     <h1 className="text-2xl font-bold mt-2">Mini {params.id}</h1>
     <p className="text-zinc-500 text-sm mt-1">Galería Cloudinary 13 vistas + lore + completeness + dataset JSON para CV/DM.</p>

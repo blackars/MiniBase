@@ -1,2 +1,6 @@
 @tailwind base; @tailwind components; @tailwind utilities;
 body { background: #09090b; }
+
+/* Estética MiniBase: liminal B/N, todo puntiagudo.
+   Cero border-radius en la app salvo las píldoras de tags (.tag-pill). */
+.mb-sharp, .mb-sharp :not(.tag-pill) { border-radius: 0 !important; }
