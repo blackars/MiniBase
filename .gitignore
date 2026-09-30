@@ -1,0 +1,11 @@
+# Claves locales — NUNCA commitear
+.env
+.env.local
+web/.env.local
+web/.env
+api/.env
+api/demo_store.json
+web/node_modules/
+web/.next/
+__pycache__/
+*.pyc
