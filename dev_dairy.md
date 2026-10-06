@@ -198,3 +198,70 @@ carga por lotes desde su Excel real (~600 filas), y poder completar miles de cam
 - +2 minis tras carga real del usuario: candidatas = filas `-v2/-v3` creadas a
   propósito + pares mismo-slug (`Dracula`/`Drácula`) antes colapsados; pendiente
   de verificación del usuario; se normaliza con el reseteo desde cero acordado.
+
+### 9.9 Maqueta Escenarios + push (sesión actual)
+- Botón `◈ Escenarios` en panel principal → `web/app/escenarios/page.tsx` (maqueta con
+  gate de login, 7 pestañas: Ficha, Partes, Editor Tile mock 12×8, Montajes, Iluminación,
+  Audio, API; botones no funcionales con contador "próximamente" + placeholders).
+- Reglas fijadas: vista `render_3d` (cualquier color, no solo gris); sintéticas etiquetadas
+  NO se suben aquí (solo fotos, arte y 1 render de referencia); taxonomía por roles
+  photo (entrena) / reference+video (no entrenan).
+- Push rama `minibase-web`: commit maqueta escenarios + link dashboard + `xlsx` en
+  package-lock. Excluido a propósito: `MiniBase v1.0.0.mp4`, `minibase_module.gif`,
+  `web/tsconfig.tsbuildinfo`, binarios `src/miniatures.db*` (ruido, no parte del port).
+- Plan de implementación Escenarios en la misma DB (sección 10 de este dairy).
+
+## 10. Plan: módulo Escenarios dentro de la DB MiniBase (mismo proyecto Supabase)
+
+Decisión: **mismo proyecto/supabase, esquema separado por prefijo `scn_` + `collection_id`
+como frontera**. Nada de segundo proyecto ni microservicios físicos por ahora; cada tarjeta
+de la maqueta = un router FastAPI + tablas propias (modularidad lógica, monolito desplegable).
+Si un módulo crece (tile-engine, audio), se extrae a servicio sin migrar datos.
+
+### 10.1 Dónde vive cada cosa (separado de la colección de miniaturas)
+- Las minis viven por `collections.id` del usuario. Los escenarios viven en paralelo:
+  `scn_scenarios.collection_id` → mismo dueño, **cero mezcla**: ningún query de minis toca
+  `scn_*` y viceversa. La correlación mini↔escenario es solo por IDs en tablas puente.
+- Imágenes: reutiliza `images` solo para minis; escenarios tienen `scn_assets`
+  (misma convención Cloudinary `minibase/{user}/scn/{slug}/{vista}`, rol photo/reference).
+- Audio: solo metadatos + URL (Cloudinary `video/` o Drive); el binario nunca en Postgres.
+
+### 10.2 Tablas (migración `005_scenarios.sql`)
+- `scn_scenarios(id, collection_id, name, slug, kind[fisico|digital|hibrido],
+  width_cm, depth_cm, height_cm, tile_cm, palette text[], texture text,
+  uses jsonb, description, comments, url, genre, visibility, created_at)`.
+- `scn_parts(id, scenario_id, name, kind[suelo|rio|puente|...], w_tiles, d_tiles,
+  colors text[], texture, notes)` + `scn_part_variants(id, part_id, name, colors, image_asset)`.
+- `scn_tile_presets(id, scenario_id, name, cols, rows, grid jsonb)` — el grid como JSONB;
+  el motor de mapas complejos lo interpreta después (versión `schema_version` por preset).
+- `scn_mounts(id, scenario_id, name, layout jsonb, notes)` +
+  `scn_mount_items(id, mount_id, kind[scenery|mini|part], ref_id uuid, x, y, z, rot)`
+  (`ref_id` apunta a `miniatures.id` o `scn_parts.id` según `kind`; sin FK cruzada dura
+  para no acoplar borrados: `ON DELETE SET NULL` lógico por código).
+- `scn_lightings(id, scenario_id, name, mood[dia|atardecer|noche|niebla], params jsonb,
+  projector_payload jsonb)` — `projector_payload` es lo que consumirá `/table/state`.
+- `scn_audios(id, scenario_id, kind[soundtrack|sfx], genre, zone, title, url,
+  duration_s)` (solo metadatos).
+- RLS espejo de minis: `exists (select 1 from collections c where c.id =
+  (select collection_id from scn_scenarios s where s.id = scenario_id)
+  and c.user_id = auth.uid())` por tabla hija; directa en `scn_scenarios`.
+
+### 10.3 API por módulos (routers `api/routers/scn_*.py`)
+- `scn_scenarios.py`: CRUD ficha + `GET /dataset` (contexto narrador/DM: ficha+partes+
+  montajes+audio del género).
+- `scn_parts.py`: CRUD partes/variantes.
+- `scn_tiles.py`: CRUD presets + `POST /validate` (grid vs partes existentes).
+- `scn_mounts.py`: CRUD montajes + `POST /combine-png` (primera versión: compone con
+  Pillow las `secure_url` en un PNG por capas; luegocola con job).
+- `scn_project.py`: `POST /{id}/project` → escribe `table_state` (fase, grid, luz)
+  para proyector/máquina de estados.
+- Todo con `job_token`/idempotencia copiada del ledger de imports (lección §8).
+
+### 10.4 Orden de construcción (sobre la maqueta, módulo por módulo)
+1. Ficha + lista (DB + CRUD + dataset narrador).
+2. Partes/variantes.
+3. Tile presets (grid JSONB + validar).
+4. Montajes + combine-png.
+5. Iluminación + project al tablero.
+6. Audio (metadatos + player).
+7. Correlador minis↔escenarios (tags/género en común, sugerencias del agente).
